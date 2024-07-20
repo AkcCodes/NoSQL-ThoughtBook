@@ -1,20 +1,28 @@
+const { User, Thought } = require('../../models');
 const router = require('express').Router();
-const {
-    getAllThoughts,
-    getThoughtsById,
-    createThought,
-    deleteThought,
-    updateThoughtById,
-    createReaction,
-    deleteReaction,
-} = require('../../controllers/thoughts-cont');
 
-router.route('/').get(getAllThoughts).post(createThought);
+router.post('/', async (req, res) => {
+    try {
+        const thoughtData = await Thought.create(
+           req.body
+    );
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+router.delete('/:id', async (req,res)=> {
+    try{
+    const thoughtData = Thought.findOneAndDelete(req.params.id)
 
-router.route('/:thoughtId').get(getThoughtsById).put(updateThoughtById).delete(deleteThought);
-
-router.route('/:thoughtId/reactions').post(createReaction);
-
-router.route('/:thoughtId/reactions/:reactionId').delete(deleteReaction);
-
+    .then(thoughtData => {
+        if( !thoughtData){
+            return res.status(404).json({ message: 'thought not found' })
+        }
+        res.json(thoughtData);
+    })
+    } catch(err) {
+        res.status(500).json(err);
+    }
+})
 module.exports = router;
